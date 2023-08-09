@@ -1,15 +1,37 @@
 import React, { useState } from 'react';
 import { Text, View, Button, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 
 const HomeScreen = ({ navigation }) => {
     const [taskName, setTaskName] = useState('');
     const [taskDetail, setTaskDetail] = useState('');
+    const [date, setDate] = useState(new Date(1598051730000));
+    const [show, setShow] = useState(false);
 
+    const onChange = (event, selectedDate) => {
+        const currentDate = selectedDate;
+        setShow(true);
+        setDate(currentDate);
+    };
 
+    const showMode = (currentMode) => {
+        DateTimePickerAndroid.open({
+            value: date,
+            onChange,
+            mode: currentMode,
+            is24Hour: true,
+        });
+    };
+
+    const showDatepicker = () => {
+        showMode('date');
+    };
 
     return (
         <View style={styles.container}>
+
+            {/* top tasks sections */}
             <View style={styles.topTasks}>
                 <Button
                     title="View all tasks"
@@ -23,8 +45,9 @@ const HomeScreen = ({ navigation }) => {
                         <Text>An individual task navigating to its screen on click and blab blaba blab</Text>
                     </TouchableOpacity>
                 </View>
-
             </View>
+
+            {/* Add task section */}
             <View style={styles.addTask}>
                 <Text>Add Task</Text>
                 <TextInput
@@ -35,6 +58,14 @@ const HomeScreen = ({ navigation }) => {
                     maxLength={40}
                     textAlignVertical='top'
                 />
+
+                <View style={styles.dateContainer}>
+                    <TouchableOpacity style={styles.dateBtn} onPress={showDatepicker} title="Due Date" ><Text style={{ color: 'white' }}>Select Due Date</Text></TouchableOpacity>
+                    {show &&
+                        <Text style={styles.dateOutput}>{date.toLocaleDateString()}</Text>
+                    }
+                </View>
+
                 <TextInput
                     style={styles.detailInput}
                     value={taskDetail}
@@ -45,14 +76,12 @@ const HomeScreen = ({ navigation }) => {
                     numberOfLines={8}
                     cursorColor={'grey'}
                     textAlignVertical='top'
-
-
                 />
                 <Button
                     title="Add Task"
                     onPress={() => console.log('button clicked')}></Button>
             </View>
-        </View>
+        </View >
     )
 }
 
@@ -73,10 +102,27 @@ const styles = StyleSheet.create({
         flex: 1,
     },
 
+    dateContainer: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        marginBottom: 10,
+        marginHorizontal: 20,
+    },
+
+    dateBtn: {
+        width: '40%',
+        backgroundColor: 'blue',
+    },
+
+    dateOutput: {
+        backgroundColor: 'yellow',
+        width: '40%'
+    },
+
     titleInput: {
         borderWidth: 1,
         borderColor: 'lightgrey',
-        height: 50,
+
         width: '90%',
         marginHorizontal: 20,
         marginVertical: 10,
@@ -86,7 +132,7 @@ const styles = StyleSheet.create({
     detailInput: {
         borderWidth: 1,
         borderColor: 'lightgrey',
-        height: 200,
+
         width: '90%',
         marginHorizontal: 20,
         borderRadius: 4
