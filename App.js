@@ -13,7 +13,11 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        screenOptions={{
+          headerTitleAlign: 'center',
+          headerTintColor: 'red'
+        }}>
         <Stack.Screen
           name="Home"
           component={HomeScreen}
