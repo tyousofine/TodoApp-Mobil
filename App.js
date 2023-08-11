@@ -5,8 +5,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 // Components
 import HomeScreen from './screens/HomeScreen';
-import TasksListScreen from './screens/TasksListScreen';
 import TaskDetailScreen from './screens/TaskDetailScreen';
+import AddTaskScreen from './screens/AddTaskScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,16 +16,19 @@ export default function App() {
       <Stack.Navigator
         screenOptions={{
           headerTitleAlign: 'center',
-          headerTintColor: 'red'
+          headerTintColor: 'red',
+          style: {
+            backgroundColor: 'pink'
+          }
         }}>
         <Stack.Screen
-          name="Home"
+          name="Tasks"
           component={HomeScreen}
         />
 
         <Stack.Screen
-          name="Tasks List"
-          component={TasksListScreen}
+          name="Add Task"
+          component={AddTaskScreen}
         />
         <Stack.Screen
           name="Task Detail"
