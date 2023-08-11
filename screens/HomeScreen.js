@@ -1,86 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Text, View, Button, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+
+import * as SQLite from "expo-sqlite";
 
 
-const HomeScreen = ({ navigation }) => {
-    const [taskName, setTaskName] = useState('');
-    const [taskDetail, setTaskDetail] = useState('');
-    const [date, setDate] = useState(new Date(1598051730000));
-    const [show, setShow] = useState(false);
 
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate;
-        setShow(true);
-        setDate(currentDate);
-    };
+const HomeScreen = ({ navigation, props }) => {
 
-    const showMode = (currentMode) => {
-        DateTimePickerAndroid.open({
-            value: date,
-            onChange,
-            mode: currentMode,
-            is24Hour: true,
+    const [dataForDatabase, setDataForDatabase] = useState({});
+    const [dataFromDatabase, setDataFromDatabase] = useState([]);
+
+    const db = SQLite.openDatabase('tasksDB');
+
+
+    // Data and DB functions:
+    useEffect(() => {
+        retrieveFromDatabase();
+        db.transaction(tx => {
+            tx.executeSql('CREATE TABLE IF NOT EXISTS tasksDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT);',
+                [],
+                () => console.log('TABLE CREATED!'),
+                (_, result) => console.log('TABLE CREATE failed:' + result)
+            );
         });
-    };
 
-    const showDatepicker = () => {
-        showMode('date');
-    };
+    }, []);
+
+
+
+    let entries = []
+    retrieveFromDatabase = () => {
+        // clear data currently stored
+
+        console.log('RETREIVE FROM DB CALLED!')
+        db.transaction(
+            tx => {
+                tx.executeSql("SELECT * FROM tasksDB",
+                    [],
+                    (_, { rows }) => {
+                        (rows._array).map((row) => entries.push(row)),
+                            console.log(entries),
+                            setDataFromDatabase(entries)
+
+                    },
+                    (_, result) => {
+                        console.log('SELECT failed!');
+                        console.log(result);
+                    }
+                )
+            }
+        );
+        console.log('DATA FROM DB AFTER RETRIVE: ', dataFromDatabase)
+    }
 
     return (
         <View style={styles.container}>
 
             {/* top tasks sections */}
             <View style={styles.topTasks}>
-                <Button
-                    title="View all tasks"
-                    onPress={() => navigation.navigate('Tasks List')}>
-                </Button>
                 <Text>Top Tasks</Text>
-                <Text>List of tasks here</Text>
-                <View>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('Task Detail')}>
-                        <Text>An individual task navigating to its screen on click and blab blaba blab</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+                <View style={{}}>
+                    {dataFromDatabase.length > 0 ?
+                        dataFromDatabase.map((item) => (
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                                <TouchableOpacity
+                                    style={{ borderWidth: 1, width: '60%' }}
+                                    key={item.id}
+                                    onPress={() => navigation.navigate(`Task Detail`, { id: item.id })}
+                                >
+                                    <Text>{item.taskName}</Text>
+                                </TouchableOpacity>
+                                <View style={{ flexDirection: 'row', gap: 15 }}>
+                                    <TouchableOpacity><Text>Complete</Text></TouchableOpacity>
+                                    <TouchableOpacity><Text>Delete</Text></TouchableOpacity>
+                                </View>
+                            </View>
 
-            {/* Add task section */}
-            <View style={styles.addTask}>
-                <Text>Add Task</Text>
-                <TextInput
-                    style={styles.titleInput}
-                    value={taskName}
-                    onChangeText={setTaskName}
-                    placeholder='Task Name'
-                    maxLength={40}
-                    textAlignVertical='top'
-                />
-
-                <View style={styles.dateContainer}>
-                    <TouchableOpacity style={styles.dateBtn} onPress={showDatepicker} title="Due Date" ><Text style={{ color: 'white' }}>Select Due Date</Text></TouchableOpacity>
-                    {show &&
-                        <Text style={styles.dateOutput}>{date.toLocaleDateString()}</Text>
-                    }
+                        )) :
+                        <Text>You have no tasks!</Text>}
                 </View>
 
-                <TextInput
-                    style={styles.detailInput}
-                    value={taskDetail}
-                    onChangeText={setTaskDetail}
-                    placeholder='Task Detail'
-                    editable
-                    multiline={true}
-                    numberOfLines={8}
-                    cursorColor={'grey'}
-                    textAlignVertical='top'
-                />
-                <Button
-                    title="Add Task"
-                    onPress={() => console.log('button clicked')}></Button>
-            </View>
+
+            </View >
+
+            <Button
+                onPress={() => navigation.navigate('Add Task')}
+                title='Add Task'></Button>
+
         </View >
     )
 }
@@ -98,46 +104,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#000000',
     },
 
-    addTask: {
-        flex: 1,
-    },
 
-    dateContainer: {
-        justifyContent: 'space-between',
-        flexDirection: 'row',
-        marginBottom: 10,
-        marginHorizontal: 20,
-    },
-
-    dateBtn: {
-        width: '40%',
-        backgroundColor: 'blue',
-    },
-
-    dateOutput: {
-        backgroundColor: 'yellow',
-        width: '40%'
-    },
-
-    titleInput: {
-        borderWidth: 1,
-        borderColor: 'lightgrey',
-
-        width: '90%',
-        marginHorizontal: 20,
-        marginVertical: 10,
-        borderRadius: 4
-    },
-
-    detailInput: {
-        borderWidth: 1,
-        borderColor: 'lightgrey',
-
-        width: '90%',
-        marginHorizontal: 20,
-        borderRadius: 4
-
-    }
 
 })
 
