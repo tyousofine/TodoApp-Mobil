@@ -7,16 +7,15 @@ import AddIcon from 'react-native-vector-icons/Ionicons';
 
 import Checked from 'react-native-vector-icons/FontAwesome';
 
+import { Dimensions } from 'react-native';
 
-
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const HomeScreen = ({ navigation, props }) => {
     let newDone = []
     const [dataFromDatabase, setDataFromDatabase] = useState([]);
     const [done, setDone] = useState([])
-    console.log('done STATE REPORT: ', done)
-
-
 
     const db = SQLite.openDatabase('taskDB');
 
@@ -25,7 +24,7 @@ const HomeScreen = ({ navigation, props }) => {
     useEffect(() => {
         retrieveFromDatabase();
         db.transaction(tx => {
-            tx.executeSql('CREATE TABLE IF NOT EXISTS taskDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT, taskDone BOOLEAN);',
+            tx.executeSql('CREATE TABLE IF NOT EXISTS taskDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT, taskDone BOOLEAN, taskDueDate TEXT);',
                 [],
                 () => console.log('TABLE CREATED!'),
                 (_, result) => console.log('TABLE CREATE failed:' + result)
@@ -37,16 +36,14 @@ const HomeScreen = ({ navigation, props }) => {
 
     let entries = []
     retrieveFromDatabase = () => {
-        // clear data currently stored
 
-        console.log('RETREIVE FROM DB CALLED!')
         db.transaction(
             tx => {
-                tx.executeSql("SELECT * FROM taskDB",
+                tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDueDate)",
                     [],
                     (_, { rows }) => {
                         (rows._array).map((row) => entries.push(row)),
-                            console.log(entries),
+
                             setDataFromDatabase(entries)
 
                     },
@@ -57,14 +54,14 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
-        console.log('DATA FROM DB AFTER RETRIVE: ', dataFromDatabase)
+
     }
 
     onTaskDone = (index) => {
         let newArray = [...done];
         newArray[index] = !newArray[index];
         setDone(newArray)
-        console.log(done)
+
     }
 
     return (
@@ -72,30 +69,36 @@ const HomeScreen = ({ navigation, props }) => {
 
             {/* top tasks sections */}
             <ScrollView>
-                <View style={styles.topTasks}>
-                    <Text>Top Tasks</Text>
-                    <View style={{}}>
-                        {dataFromDatabase.length > 0 ?
-                            dataFromDatabase.map((item) => (
-                                <View style={{ flexDirection: 'row', gap: 10 }}
-                                    key={item.id}>
+
+                <View style={styles.tasksContainer}>
+                    {dataFromDatabase.length > 0 ?
+                        dataFromDatabase.map((item) => (
+                            <View style={styles.topTasks}
+                                key={item.id}>
+                                <View>
                                     <TouchableOpacity
                                         onPress={() => onTaskDone(item.id)}>
                                         <Checked
                                             name={done[item.id] ? 'check-square-o' : 'square-o'}
                                             size={25}
-                                            style={[done[item.id] ? styles.textLineThrough : styles.normalText]} /></TouchableOpacity>
+                                            style={{ color: 'grey', paddingTop: 4, width: 25 }} /></TouchableOpacity>
+                                </View>
+                                <View>
                                     <TouchableOpacity
                                         key={item.id}
-                                        onPress={() => navigation.navigate(`Task Detail`, { id: item.id })}
+                                        onPress={() => navigation.navigate(`Task Detail`, { id: item.id })
+                                        }
+                                        style={{ width: windowWidth }}
                                     ><Text
-                                        style={[done[item.id] ? styles.textLineThrough : styles.normalText]}>{item.taskName}</Text>
+                                        style={[done[item.id] ? styles.textLineThrough : styles.normalText]}>{item.taskName}
+                                        </Text>
+                                        <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
                                     </TouchableOpacity>
                                 </View>
+                            </View>
 
-                            )) :
-                            <Text>You have no tasks!</Text>}
-                    </View>
+                        )) :
+                        <Text style={styles.noTasks}>No Tasks to display</Text>}
                 </View >
             </ScrollView>
             <TouchableOpacity
@@ -112,6 +115,32 @@ const HomeScreen = ({ navigation, props }) => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+    tasksContainer: {
+        backgroundColor: '#fafafa',
+        paddingTop: 15,
+        minHeight: windowHeight,
+
+    },
+
+    noTasks: {
+        fontSize: 20,
+        marginLeft: windowWidth / 5,
+        marginTop: 30
+    },
+
+
+    topTasks: {
+        borderWidth: 0.5,
+        borderColor: 'lightgrey',
+
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+        marginBottom: 7,
+        marginHorizontal: 10,
+        borderBottomColor: 'lightgrey',
+        padding: 5
+    },
 
     addIcon: {
         position: 'absolute',
@@ -120,11 +149,14 @@ const styles = StyleSheet.create({
     },
 
     normalText: {
+        color: '#171717',
+        fontSize: 15
     },
 
     textLineThrough: {
         textDecorationLine: 'line-through',
-        color: '#a9a9a9'
+        color: '#a9a9a9',
+        fontSize: 15
     }
 })
 

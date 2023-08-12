@@ -5,7 +5,13 @@ import * as SQLite from "expo-sqlite";
 
 import DateIcon from 'react-native-vector-icons/Fontisto';
 import BackIcon from 'react-native-vector-icons/Feather';
-import SaveIcon from 'react-native-vector-icons/Entypo'
+
+import { Dimensions } from 'react-native';
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
+
 
 
 
@@ -14,6 +20,7 @@ const AddTaskScreen = ({ navigation }) => {
     const [taskName, setTaskName] = useState('');
     const [taskDetail, setTaskDetail] = useState('');
     const [taskDueDate, setTaskDueDate] = useState(new Date());
+    const [forNoDatePicked, setForNoDatePicked] = useState(true);
     const [show, setShow] = useState(false);
 
     const [success, setSuccess] = useState(false)
@@ -27,13 +34,15 @@ const AddTaskScreen = ({ navigation }) => {
             return
         }
 
+
         console.log('SAVE TO DB CALLED')
         db.transaction(
             tx => {
-                tx.executeSql("INSERT INTO taskDB (taskName, taskDetail, taskDone) values (?, ?, 'false')",
-                    [taskName, taskDetail],
+                tx.executeSql("INSERT INTO taskDB (taskName, taskDetail, taskDueDate, taskDone) values (?, ?, ?, false)",
+                    [taskName, taskDetail, forNoDatePicked ? '' : taskDueDate.toLocaleDateString()],
                     (_, { rowsAffected }) => {
                         if (rowsAffected > 0) {
+                            console.log('TASK DUE DATE :', taskDueDate)
                             console.log('ROW INSERTED!')
                             setSuccess(true);
                             setTaskName('');
@@ -47,7 +56,6 @@ const AddTaskScreen = ({ navigation }) => {
                 );
             }
         );
-
 
         setTimeout(() => setSuccess(false), 2000)
         retrieveFromDatabase()
@@ -69,7 +77,6 @@ const AddTaskScreen = ({ navigation }) => {
             is24Hour: true,
             display: 'calendar',
 
-
         });
     };
 
@@ -77,11 +84,13 @@ const AddTaskScreen = ({ navigation }) => {
         setTaskDueDate(new Date());
         showMode('date');
         setShow(false);
+        setForNoDatePicked(false)
     };
 
     const clearDate = () => {
         setTaskDueDate(new Date())
         setShow(false);
+        setForNoDatePicked(true);
     }
     return (
         < View style={styles.addTaskContainer} >
@@ -90,20 +99,16 @@ const AddTaskScreen = ({ navigation }) => {
                 value={taskName}
                 onChangeText={setTaskName}
                 placeholder='Task'
-                maxLength={40}
+                maxLength={100}
                 textAlignVertical='top'
             />
 
             <View style={styles.dateContainer}>
-                <TouchableOpacity onPress={(event) => showDatepicker()} title="Due Date" >
-                    <DateIcon name='date' size={40} style={styles.dateBtn} />
-                    <Text style={{ fontSize: 7, color: '#318CE7' }}>Calendar</Text>
-                </TouchableOpacity>
+
                 <View style={styles.dateOutputFrame}>
                     <Text style={{ color: 'grey' }}>Due Date:
                     </Text>
                     {show &&
-
                         <TouchableOpacity
                             onPress={clearDate}
                             style={styles.dateOutputBtn}
@@ -111,10 +116,13 @@ const AddTaskScreen = ({ navigation }) => {
                             <Text >{taskDueDate.toLocaleDateString()}
                             </Text>
                         </TouchableOpacity>
-
                     }
 
                 </View>
+                <TouchableOpacity onPress={(event) => showDatepicker()} title="Due Date" style={{}} >
+                    <DateIcon name='date' size={40} style={styles.dateBtn} />
+
+                </TouchableOpacity>
             </View>
 
             <TextInput
@@ -146,8 +154,8 @@ const AddTaskScreen = ({ navigation }) => {
                 ) : (
                     <TouchableOpacity
                         TouchableOpacity={0.5}
-                        style={[styles.saveBtn, { backgroundColor: 'green' }]}>
-                        <Text style={styles.saveBtnTxt}>SUCCESS!</Text>
+                        style={[styles.saveBtn, { backgroundColor: 'navy' }]}>
+                        <Text style={styles.saveBtnTxt}>Success</Text>
                     </TouchableOpacity>
 
                 )}
@@ -166,6 +174,8 @@ const styles = StyleSheet.create({
     },
 
     dateContainer: {
+
+
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
