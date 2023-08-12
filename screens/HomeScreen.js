@@ -71,8 +71,8 @@ const HomeScreen = ({ navigation, props }) => {
         <View style={styles.container}>
 
             {/* top tasks sections */}
-            <View style={styles.topTasks}>
-                <ScrollView>
+            <ScrollView>
+                <View style={styles.topTasks}>
                     <Text>Top Tasks</Text>
                     <View style={{}}>
                         {dataFromDatabase.length > 0 ?
@@ -96,11 +96,14 @@ const HomeScreen = ({ navigation, props }) => {
                             )) :
                             <Text>You have no tasks!</Text>}
                     </View>
-                </ScrollView>
-            </View >
+                </View >
+            </ScrollView>
             <TouchableOpacity
                 onPress={() => navigation.navigate('Add Task')}
-            ><AddIcon name="add-circle-sharp" size={60} color="#318CE7" style={styles.addIcon} /></TouchableOpacity>
+                style={styles.addIcon}
+            >
+                <AddIcon name="add-circle-sharp" size={60} color="#318CE7" />
+            </TouchableOpacity>
 
         </View >
     )
@@ -109,18 +112,11 @@ const HomeScreen = ({ navigation, props }) => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-
-    topTasks: {
-        flex: 1,
-    },
 
     addIcon: {
         position: 'absolute',
-        bottom: 20,
-        right: 20,
+        bottom: 25,
+        right: 25
     },
 
     normalText: {
