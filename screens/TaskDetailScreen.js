@@ -24,10 +24,9 @@ const TaskDetailScreen = ({ route, navigation }) => {
 
     return (
         <View>
-            <Text>Task title here</Text>
-            <Text>Task detail here here</Text>
-            <Text>Figure out how to edit tasks?</Text>
-            <Text>{id}</Text>
+            <Text>Task edit and detail comming soon!</Text>
+
+            <Text>task id: {id}</Text>
 
         </View>
     )

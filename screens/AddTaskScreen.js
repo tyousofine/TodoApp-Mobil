@@ -3,25 +3,43 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button } from 'rea
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import * as SQLite from "expo-sqlite";
 
+import DateIcon from 'react-native-vector-icons/Fontisto';
+import BackIcon from 'react-native-vector-icons/Feather';
+import SaveIcon from 'react-native-vector-icons/Entypo'
 
-const AddTaskScreen = () => {
+
+
+const AddTaskScreen = ({ navigation }) => {
 
     const [taskName, setTaskName] = useState('');
     const [taskDetail, setTaskDetail] = useState('');
     const [taskDueDate, setTaskDueDate] = useState(new Date());
     const [show, setShow] = useState(false);
 
-    const db = SQLite.openDatabase('tasksDB');
+    const [success, setSuccess] = useState(false)
+
+    const db = SQLite.openDatabase('taskDB');
 
     saveToDatabase = () => {
+
+        if (taskName === '') {
+            alert('Please enter a task')
+            return
+        }
+
         console.log('SAVE TO DB CALLED')
         db.transaction(
             tx => {
-                tx.executeSql("INSERT INTO tasksDB (taskName, taskDetail) values (?, ?)",
+                tx.executeSql("INSERT INTO taskDB (taskName, taskDetail, taskDone) values (?, ?, 'false')",
                     [taskName, taskDetail],
                     (_, { rowsAffected }) => {
                         if (rowsAffected > 0) {
                             console.log('ROW INSERTED!')
+                            setSuccess(true);
+                            setTaskName('');
+                            setTaskDetail('');
+                            clearDate()
+
                         }
                         else { console.log('INSERT FAILED!') }
                     },
@@ -29,7 +47,11 @@ const AddTaskScreen = () => {
                 );
             }
         );
+
+
+        setTimeout(() => setSuccess(false), 2000)
         retrieveFromDatabase()
+
     }
 
     // Date picker functions
@@ -45,6 +67,9 @@ const AddTaskScreen = () => {
             onChange,
             mode: currentMode,
             is24Hour: true,
+            display: 'calendar',
+
+
         });
     };
 
@@ -59,45 +84,74 @@ const AddTaskScreen = () => {
         setShow(false);
     }
     return (
-        < View style={styles.addTask} >
-            <Text>Add Task</Text>
+        < View style={styles.addTaskContainer} >
             <TextInput
                 style={styles.titleInput}
                 value={taskName}
                 onChangeText={setTaskName}
-                placeholder='Task Name'
+                placeholder='Task'
                 maxLength={40}
                 textAlignVertical='top'
             />
 
             <View style={styles.dateContainer}>
-                <TouchableOpacity style={styles.dateBtn} onPress={(event) => showDatepicker()} title="Due Date" ><Text style={{ color: 'white' }}>Select Due Date</Text></TouchableOpacity>
-                {show &&
-                    <TouchableOpacity
-                        onPress={clearDate}
-                        style={styles.dateOutput}
-                    >
-                        <Text >{taskDueDate.toLocaleDateString()}
-                        </Text>
-                    </TouchableOpacity>
-                }
+                <TouchableOpacity onPress={(event) => showDatepicker()} title="Due Date" >
+                    <DateIcon name='date' size={40} style={styles.dateBtn} />
+                    <Text style={{ fontSize: 7, color: '#318CE7' }}>Calendar</Text>
+                </TouchableOpacity>
+                <View style={styles.dateOutputFrame}>
+                    <Text style={{ color: 'grey' }}>Due Date:
+                    </Text>
+                    {show &&
+
+                        <TouchableOpacity
+                            onPress={clearDate}
+                            style={styles.dateOutputBtn}
+                        >
+                            <Text >{taskDueDate.toLocaleDateString()}
+                            </Text>
+                        </TouchableOpacity>
+
+                    }
+
+                </View>
             </View>
 
             <TextInput
                 style={styles.detailInput}
                 value={taskDetail}
                 onChangeText={setTaskDetail}
-                placeholder='Task Detail'
+                placeholder='Detail'
                 editable
                 multiline={true}
                 numberOfLines={8}
                 cursorColor={'grey'}
                 textAlignVertical='top'
             />
-            <Button
-                title="Add Task"
-                onPress={() => saveToDatabase()}>
-            </Button>
+            <View style={styles.btnsContainer}>
+                <BackIcon
+                    name="arrow-left-circle"
+                    size={40}
+                    style={styles.backIcon}
+                    onPress={() => navigation.navigate('Tasks')} />
+
+
+                {!success ? (
+                    <TouchableOpacity
+                        TouchableOpacity={0.5}
+                        style={[styles.saveBtn, { backgroundColor: '#318CE7' }]}
+                        onPress={() => saveToDatabase()}>
+                        <Text style={styles.saveBtnTxt}>ADD</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <TouchableOpacity
+                        TouchableOpacity={0.5}
+                        style={[styles.saveBtn, { backgroundColor: 'green' }]}>
+                        <Text style={styles.saveBtnTxt}>SUCCESS!</Text>
+                    </TouchableOpacity>
+
+                )}
+            </View>
         </View >
     )
 }
@@ -105,45 +159,102 @@ const AddTaskScreen = () => {
 export default AddTaskScreen;
 
 const styles = StyleSheet.create({
-    addTask: {
-        flex: 1,
+    addTaskContainer: {
+        display: 'flex',
+        gap: 10,
+        marginTop: 10
     },
 
     dateContainer: {
         justifyContent: 'space-between',
+        alignItems: 'center',
         flexDirection: 'row',
         marginBottom: 10,
         marginHorizontal: 20,
+
     },
 
     dateBtn: {
-        width: '40%',
-        backgroundColor: 'blue',
+        color: '#318CE7',
     },
 
-    dateOutput: {
-        backgroundColor: 'yellow',
-        width: '40%'
+    dateOutputFrame: {
+        display: 'flex',
+        position: 'relative',
+        justifyContent: 'space-between',
+        borderWidth: 1,
+        padding: 4,
+        borderRadius: 4,
+        borderColor: "lightgrey",
+        width: '70%',
+        height: 40,
+
+    },
+
+    btnText: {
+        color: 'white',
+        textAlign: 'center',
+        fontWeight: 'bold'
+    },
+
+    dateOutputBtn: {
+        position: 'absolute',
+        right: 0,
+        top: 5,
+
+
     },
 
     titleInput: {
         borderWidth: 1,
         borderColor: 'lightgrey',
-
         width: '90%',
         marginHorizontal: 20,
         marginVertical: 10,
-        borderRadius: 4
+        borderRadius: 4,
+        paddingVertical: 6
     },
 
     detailInput: {
         borderWidth: 1,
         borderColor: 'lightgrey',
-
         width: '90%',
         marginHorizontal: 20,
         borderRadius: 4
 
+    },
+
+    btnsContainer: {
+
+        justifyContent: 'center',
+        alignItems: 'center',
+        display: 'flex',
+        flexDirection: 'row'
+
+    },
+
+    saveBtn: {
+        // backgroundColor: "#318CE7",
+        color: 'white',
+        width: '25%',
+        marginLeft: 'auto',
+        marginRight: 20,
+        padding: 6,
+        borderRadius: 4,
+        marginTop: 5
+    },
+
+    saveBtnTxt: {
+        color: '#fff',
+        textAlign: 'center',
+        marginBottom: 4,
+        fontWeight: 'bold'
+    },
+
+    backIcon: {
+        color: "#318CE7",
+        marginLeft: 20,
     }
+
 
 })
