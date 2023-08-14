@@ -20,8 +20,8 @@ const AddTaskScreen = ({ navigation }) => {
     const [taskName, setTaskName] = useState('');
     const [taskDetail, setTaskDetail] = useState('');
     const [taskDueDate, setTaskDueDate] = useState(new Date());
-    const [forNoDatePicked, setForNoDatePicked] = useState(true);
     const [show, setShow] = useState(false);
+    const [forNoDatePicked, setForNoDatePicked] = useState(true);
 
     const [success, setSuccess] = useState(false)
 

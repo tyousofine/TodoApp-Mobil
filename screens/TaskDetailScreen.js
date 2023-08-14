@@ -1,35 +1,76 @@
-import React, { useState } from 'react';
-import { View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 
 import * as SQLite from "expo-sqlite";
 
+import DeleteIcon from 'react-native-vector-icons/AntDesign';
+
+
 const TaskDetailScreen = ({ route, navigation }) => {
     const { id } = route.params;
+    const [row, setRow] = useState([])
 
-    const db = SQLite.openDatabase('tasksDB');
+    const db = SQLite.openDatabase('taskDB');
 
-    db.transaction((tx) => {
-        tx.executeSql(
-            'SELECT * FROM tasksDB where id = (id)',
-            [],
-            (_, row) => {
-                if (!!row) {
-                    console.log('success')
-                } else {
-                    console.log('No task found');
+    useEffect(() => {
+        db.transaction((tx) => {
+            tx.executeSql(
+                `SELECT * FROM taskDB WHERE id = ${id}`,
+                [],
+                (_, result) => {
+                    if (result.rows.length > 0) {
+                        const res = result.rows.item(0);
+                        setRow(res)
+                        console.log('success')
+                    } else {
+                        console.log('No task found');
+                    }
+
+                },
+                (_, error) => {
+                    console.log('Error executing SQL query:', error);
                 }
-            }
-        );
-    });
+            );
+        });
+
+    }, []);
+    console.log(id)
+    console.log('ROW: ', row)
 
     return (
         <View>
-            <Text>Task edit and detail comming soon!</Text>
+            <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                <Text>Task:</Text>
+                <TouchableOpacity>
+                    <DeleteIcon name='delete' size={30} style={{ color: 'red' }} />
+                </TouchableOpacity>
+            </View>
+            <TextInput
+                style={styles.titleInput}
+                value={row.taskName}
+                // onChangeText={setTaskName}
+                placeholder='Task'
+                maxLength={100}
+                textAlignVertical='top'
+            />
 
-            <Text>task id: {id}</Text>
+            <Text>task id: {id} Task name: {row.taskName}</Text>
 
         </View>
     )
 }
 
 export default TaskDetailScreen;
+
+const styles = StyleSheet.create({
+    titleInput: {
+        borderWidth: 1,
+        borderColor: 'lightgrey',
+        width: '90%',
+        marginHorizontal: 20,
+        marginVertical: 10,
+        borderRadius: 4,
+        paddingVertical: 6
+    },
+
+})

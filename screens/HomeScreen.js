@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
 
 
     topTasks: {
-        borderWidth: 0.5,
+        borderBottomWidth: 0.5,
         borderColor: 'lightgrey',
 
         flexDirection: 'row',
