@@ -34,8 +34,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
         });
 
     }, []);
-    console.log(id)
-    console.log('ROW: ', row)
+
 
     return (
         <View>
@@ -47,11 +46,20 @@ const TaskDetailScreen = ({ route, navigation }) => {
             </View>
             <TextInput
                 style={styles.titleInput}
-                value={row.taskName}
-                // onChangeText={setTaskName}
-                placeholder='Task'
-                maxLength={100}
-                textAlignVertical='top'
+                defaultValue={row.taskName}
+            // onChangeText={setTaskName}
+
+            />
+
+            <TextInput
+                defaultValue={row.taskDueDate}
+
+
+            />
+            <TextInput
+                defaultValue={row.taskDetail}
+
+
             />
 
             <Text>task id: {id} Task name: {row.taskName}</Text>
