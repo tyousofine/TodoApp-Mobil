@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 
 import * as SQLite from "expo-sqlite";
 
@@ -13,6 +14,7 @@ const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
 const HomeScreen = ({ navigation, props }) => {
+    const isFocused = useIsFocused();
     let newDone = []
     const [dataFromDatabase, setDataFromDatabase] = useState([]);
     const [done, setDone] = useState([])
@@ -20,9 +22,12 @@ const HomeScreen = ({ navigation, props }) => {
     const db = SQLite.openDatabase('taskDB');
 
 
+    // const extractDone = () => {
+    //     setDone(dataFromDatabase.map((check) => check.taskDone))
+    // }
     // Data and DB functions:
     useEffect(() => {
-        retrieveFromDatabase();
+        console.log('1st DATE FROM DATABASE: ', dataFromDatabase)
         db.transaction(tx => {
             tx.executeSql('CREATE TABLE IF NOT EXISTS taskDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT, taskDone BOOLEAN, taskDueDate TEXT);',
                 [],
@@ -30,13 +35,21 @@ const HomeScreen = ({ navigation, props }) => {
                 (_, result) => console.log('TABLE CREATE failed:' + result)
             );
         });
-        setDone(dataFromDatabase.map((check) => check.taskDone))
+        retrieveFromDatabase();
+        // extractDone();
 
     }, []);
 
-    let entries = []
-    retrieveFromDatabase = () => {
+    useEffect(() => {
+        if (isFocused) {
+            retrieveFromDatabase()
+            console.log('db retreive: ', dataFromDatabase)
+        }
 
+    }, [isFocused])
+
+    retrieveFromDatabase = () => {
+        let entries = []
         db.transaction(
             tx => {
                 tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDueDate)",
@@ -54,14 +67,29 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
-
     }
 
     onTaskDone = (index) => {
-        let newArray = [...done];
-        newArray[index] = !newArray[index];
-        setDone(newArray)
 
+        db.transaction(
+            tx => {
+                tx.executeSql(`UPDATE taskDB SET taskDone = ((taskDone | 1) - (taskDone & 1)) WHERE id = ${index}`,
+                    console.log('INDEX', index),
+                    [],
+                    (_, result) => {
+                        console.log('RESULT: ', result)
+                        console.log('success')
+
+                    },
+
+
+                    (_, error) => {
+                        console.log('Error executing SQL query:', error);
+                    }
+                )
+            }
+        );
+        retrieveFromDatabase()
     }
 
     return (
@@ -79,7 +107,7 @@ const HomeScreen = ({ navigation, props }) => {
                                     <TouchableOpacity
                                         onPress={() => onTaskDone(item.id)}>
                                         <Checked
-                                            name={done[item.id] ? 'check-square-o' : 'square-o'}
+                                            name={item.taskDone ? 'check-square-o' : 'square-o'}
                                             size={25}
                                             style={{ color: 'grey', paddingTop: 4, width: 25 }} /></TouchableOpacity>
                                 </View>
@@ -90,7 +118,7 @@ const HomeScreen = ({ navigation, props }) => {
                                         }
                                         style={{ width: windowWidth }}
                                     ><Text
-                                        style={[done[item.id] ? styles.textLineThrough : styles.normalText]}>{item.taskName}
+                                        style={[item.taskDone ? styles.textLineThrough : styles.normalText]}>{item.taskName}
                                         </Text>
                                         <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
                                     </TouchableOpacity>

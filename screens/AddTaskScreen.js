@@ -11,10 +11,6 @@ import { Dimensions } from 'react-native';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-
-
-
-
 const AddTaskScreen = ({ navigation }) => {
 
     const [taskName, setTaskName] = useState('');
@@ -34,16 +30,12 @@ const AddTaskScreen = ({ navigation }) => {
             return
         }
 
-
-        console.log('SAVE TO DB CALLED')
         db.transaction(
             tx => {
                 tx.executeSql("INSERT INTO taskDB (taskName, taskDetail, taskDueDate, taskDone) values (?, ?, ?, false)",
                     [taskName, taskDetail, forNoDatePicked ? '' : taskDueDate.toLocaleDateString()],
                     (_, { rowsAffected }) => {
                         if (rowsAffected > 0) {
-                            console.log('TASK DUE DATE :', taskDueDate)
-                            console.log('ROW INSERTED!')
                             setSuccess(true);
                             setTaskName('');
                             setTaskDetail('');
@@ -58,7 +50,7 @@ const AddTaskScreen = ({ navigation }) => {
         );
 
         setTimeout(() => setSuccess(false), 2000)
-        retrieveFromDatabase()
+        // retrieveFromDatabase()
 
     }
 
