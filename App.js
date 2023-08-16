@@ -31,7 +31,7 @@ export default function App() {
           component={AddTaskScreen}
         />
         <Stack.Screen
-          name="Task Detail"
+          name="Edit Task"
           component={TaskDetailScreen}
         />
       </Stack.Navigator>

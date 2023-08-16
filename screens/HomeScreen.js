@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { Text, View, Button, StyleSheet, TextInput, TouchableOpacity, ScrollView, Keyboard } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 
 import * as SQLite from "expo-sqlite";
 
 import AddIcon from 'react-native-vector-icons/Ionicons';
-
+import SearchIcon from 'react-native-vector-icons/AntDesign'
 import Checked from 'react-native-vector-icons/FontAwesome';
 
 import { Dimensions } from 'react-native';
+
+
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -18,6 +20,8 @@ const HomeScreen = ({ navigation, props }) => {
     let newDone = []
     const [dataFromDatabase, setDataFromDatabase] = useState([]);
     const [done, setDone] = useState([])
+    const [searchValue, setSearchValue] = useState('')
+    const [searchArray, setSearchArray] = useState([])
 
     const db = SQLite.openDatabase('taskDB');
 
@@ -27,7 +31,7 @@ const HomeScreen = ({ navigation, props }) => {
     // }
     // Data and DB functions:
     useEffect(() => {
-        console.log('1st DATE FROM DATABASE: ', dataFromDatabase)
+
         db.transaction(tx => {
             tx.executeSql('CREATE TABLE IF NOT EXISTS taskDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT, taskDone BOOLEAN, taskDueDate TEXT);',
                 [],
@@ -43,13 +47,13 @@ const HomeScreen = ({ navigation, props }) => {
     useEffect(() => {
         if (isFocused) {
             retrieveFromDatabase()
-            console.log('db retreive: ', dataFromDatabase)
         }
 
-    }, [isFocused])
+    }, [isFocused, dataFromDatabase])
 
     retrieveFromDatabase = () => {
         let entries = []
+
         db.transaction(
             tx => {
                 tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDueDate)",
@@ -57,7 +61,8 @@ const HomeScreen = ({ navigation, props }) => {
                     (_, { rows }) => {
                         (rows._array).map((row) => entries.push(row)),
 
-                            setDataFromDatabase(entries)
+                            setDataFromDatabase(entries);
+
 
                     },
                     (_, result) => {
@@ -67,6 +72,7 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
+        dataToLoop = dataFromDatabase;
     }
 
     onTaskDone = (index) => {
@@ -74,7 +80,7 @@ const HomeScreen = ({ navigation, props }) => {
         db.transaction(
             tx => {
                 tx.executeSql(`UPDATE taskDB SET taskDone = ((taskDone | 1) - (taskDone & 1)) WHERE id = ${index}`,
-                    console.log('INDEX', index),
+
                     [],
                     (_, result) => {
                         console.log('RESULT: ', result)
@@ -92,16 +98,72 @@ const HomeScreen = ({ navigation, props }) => {
         retrieveFromDatabase()
     }
 
+    const searchTasks = (searchValue) => {
+        let searchResults = []
+        dataFromDatabase.map((item) => {
+            if (item.taskName.includes(searchValue)) {
+                const duplicate = searchResults.find((e) =>
+                    e.id === item.id)
+                if (duplicate) return;
+
+                searchResults.push(item);
+            }
+
+            if (item.taskDetail.includes(searchValue)) {
+                const duplicate = searchResults.find((e) =>
+                    e.id === item.id)
+                if (duplicate) return;
+                searchResults.push(item);
+            }
+
+            if (item.taskDueDate.includes(searchValue)) {
+                const duplicate = searchResults.find((e) =>
+                    e.id === item.id)
+                if (duplicate) return;
+                searchResults.push(item);
+            }
+        })
+        console.log('SEARCH RESULTES: ', searchResults)
+        setSearchArray(searchResults);
+        setDataFromDatabase(searchResults);
+
+        console.log('DATA FROM DATABASE: ', dataFromDatabase)
+
+    }
+
+
+
     return (
         <View style={styles.container}>
 
             {/* top tasks sections */}
-            <ScrollView>
+            <ScrollView
+                keyboardDismissMode='handled'>
+                <View style={{
+                    display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center',
+                    backgroundColor: 'lightblue',
+                    padding: 10
+                }}>
 
+                    <TextInput
+                        style={{ borderWidth: 0.25, width: '90%', borderColor: 'lightgrey', backgroundColor: 'white', height: 40 }}
+                        value={searchValue}
+                        onChangeText={setSearchValue}
+                        maxLength={100}
+                    // onChange={() => { if (searchValue === '') { retrieveFromDatabase() } }}
+                    >
+                    </TextInput>
+                    <TouchableOpacity
+                        onPress={() => searchTasks(searchValue)}
+                        onSubmitEditing={Keyboard.dismiss}
+                    >
+                        <SearchIcon name='search1' size={25} style={{ color: '#171717' }}></SearchIcon>
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.tasksContainer}>
-                    {dataFromDatabase.length > 0 ?
+                    {(dataFromDatabase.length > 0) && (searchArray.length === 0) ?
                         dataFromDatabase.map((item) => (
-                            <View style={styles.topTasks}
+                            <View style={styles.tasks}
                                 key={item.id}>
                                 <View>
                                     <TouchableOpacity
@@ -114,7 +176,7 @@ const HomeScreen = ({ navigation, props }) => {
                                 <View>
                                     <TouchableOpacity
                                         key={item.id}
-                                        onPress={() => navigation.navigate(`Task Detail`, { id: item.id })
+                                        onPress={() => navigation.navigate(`Edit Task`, { id: item.id })
                                         }
                                         style={{ width: windowWidth }}
                                     ><Text
@@ -144,10 +206,10 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
     tasksContainer: {
+        paddingHorizontal: 12,
         backgroundColor: '#fafafa',
         paddingTop: 15,
         minHeight: windowHeight,
-
     },
 
     noTasks: {
@@ -157,7 +219,7 @@ const styles = StyleSheet.create({
     },
 
 
-    topTasks: {
+    tasks: {
         borderBottomWidth: 0.5,
         borderColor: 'lightgrey',
 
@@ -165,7 +227,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start',
         gap: 12,
         marginBottom: 7,
-        marginHorizontal: 10,
+
         borderBottomColor: 'lightgrey',
         padding: 5
     },
