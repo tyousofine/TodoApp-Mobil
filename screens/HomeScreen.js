@@ -8,6 +8,8 @@ import AddIcon from 'react-native-vector-icons/Ionicons';
 import SearchIcon from 'react-native-vector-icons/AntDesign'
 import Checked from 'react-native-vector-icons/FontAwesome';
 
+import TaskList from '../components/TaskList';
+
 import { Dimensions } from 'react-native';
 
 
@@ -49,7 +51,7 @@ const HomeScreen = ({ navigation, props }) => {
             retrieveFromDatabase()
         }
 
-    }, [isFocused, dataFromDatabase])
+    }, [isFocused])
 
     retrieveFromDatabase = () => {
         let entries = []
@@ -72,11 +74,11 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
-        dataToLoop = dataFromDatabase;
+
     }
 
     onTaskDone = (index) => {
-
+        console.log('DATA in HOME SCREEN: ', dataFromDatabase)
         db.transaction(
             tx => {
                 tx.executeSql(`UPDATE taskDB SET taskDone = ((taskDone | 1) - (taskDone & 1)) WHERE id = ${index}`,
@@ -138,7 +140,7 @@ const HomeScreen = ({ navigation, props }) => {
 
             {/* top tasks sections */}
             <ScrollView
-                keyboardDismissMode='handled'>
+                keyboardDismissMode='true'>
                 <View style={{
                     display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center',
                     backgroundColor: 'lightblue',
@@ -161,34 +163,14 @@ const HomeScreen = ({ navigation, props }) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.tasksContainer}>
-                    {(dataFromDatabase.length > 0) && (searchArray.length === 0) ?
-                        dataFromDatabase.map((item) => (
-                            <View style={styles.tasks}
-                                key={item.id}>
-                                <View>
-                                    <TouchableOpacity
-                                        onPress={() => onTaskDone(item.id)}>
-                                        <Checked
-                                            name={item.taskDone ? 'check-square-o' : 'square-o'}
-                                            size={25}
-                                            style={{ color: 'grey', paddingTop: 4, width: 25 }} /></TouchableOpacity>
-                                </View>
-                                <View>
-                                    <TouchableOpacity
-                                        key={item.id}
-                                        onPress={() => navigation.navigate(`Edit Task`, { id: item.id })
-                                        }
-                                        style={{ width: windowWidth }}
-                                    ><Text
-                                        style={[item.taskDone ? styles.textLineThrough : styles.normalText]}>{item.taskName}
-                                        </Text>
-                                        <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
+                    {dataFromDatabase.length > 0 ? (
+                        <TaskList
 
-                        )) :
-                        <Text style={styles.noTasks}>No Tasks to display</Text>}
+                            data={dataFromDatabase}
+                            onTaskDone={onTaskDone} />
+                    ) : (
+                        <Text style={styles.noTasks}>No Tasks to Display</Text>
+                    )}
                 </View >
             </ScrollView>
             <TouchableOpacity
@@ -206,9 +188,9 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
     tasksContainer: {
+        paddingTop: 20,
         paddingHorizontal: 12,
         backgroundColor: '#fafafa',
-        paddingTop: 15,
         minHeight: windowHeight,
     },
 
@@ -219,34 +201,6 @@ const styles = StyleSheet.create({
     },
 
 
-    tasks: {
-        borderBottomWidth: 0.5,
-        borderColor: 'lightgrey',
 
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        gap: 12,
-        marginBottom: 7,
-
-        borderBottomColor: 'lightgrey',
-        padding: 5
-    },
-
-    addIcon: {
-        position: 'absolute',
-        bottom: 25,
-        right: 25
-    },
-
-    normalText: {
-        color: '#171717',
-        fontSize: 15
-    },
-
-    textLineThrough: {
-        textDecorationLine: 'line-through',
-        color: '#a9a9a9',
-        fontSize: 15
-    }
 })
 

@@ -1,34 +1,98 @@
-import React from 'react'
-import { TouchableOpacity, View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react'
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
+import Checked from 'react-native-vector-icons/FontAwesome';
+
+import { Dimensions } from 'react-native';
 
 
-const TaskList = () => {
+
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
+
+const TaskList = (props) => {
+    const [tasks, setTasks] = useState(props.data);
+
+    useEffect(() => {
+
+        setTasks(props.data);
+    }, [props.data]);
+
+    console.log('TASKS IN CHILD: ', tasks)
+
+
+
+    const onTaskDone = (id) => {
+        props.onTaskDone(id)
+
+    }
+
     return (
-        <View style={styles.tasks}
-            key={item.id}>
+        tasks?.map((item) => (
             <View>
-                <TouchableOpacity
-                    onPress={() => onTaskDone(item.id)}>
-                    <Checked
-                        name={item.taskDone ? 'check-square-o' : 'square-o'}
-                        size={25}
-                        style={{ color: 'grey', paddingTop: 4, width: 25 }} /></TouchableOpacity>
-            </View>
-            <View>
-                <TouchableOpacity
-                    key={item.id}
-                    onPress={() => navigation.navigate(`Edit Task`, { id: item.id })
-                    }
-                    style={{ width: windowWidth }}
-                ><Text
-                    style={[item.taskDone ? styles.textLineThrough : styles.normalText]}>{item.taskName}
-                    </Text>
-                    <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    )
+                <View style={styles.tasks}
+                    key={item.id}>
+                    <View>
+                        <TouchableOpacity
+                            onPress={() => onTaskDone(item.id)}>
+                            <Checked
+                                name={item.taskDone ? 'check-square-o' : 'square-o'}
+                                size={25}
+                                style={{ color: 'grey', paddingTop: 4, width: 25 }} /></TouchableOpacity>
+                    </View>
+                    <View>
+                        <TouchableOpacity
+                            key={item.id}
+                            onPress={() => navigation.navigate(`Edit Task`, { id: item.id })
+                            }
+                            style={{ width: windowWidth }}
+                        ><Text
+                            style={[item.taskDone ? styles.textLineThrough : styles.normalText]}>{item.taskName}
+                            </Text>
+                            <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
+                        </TouchableOpacity>
+                    </View>
 
+                </View>
+            </View>
+        ))
+    )
 }
 
 export default TaskList;
+
+
+const styles = StyleSheet.create({
+
+    tasks: {
+
+        borderBottomWidth: 0.5,
+        borderColor: 'lightgrey',
+
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 12,
+        marginBottom: 7,
+
+        borderBottomColor: 'lightgrey',
+        padding: 5
+    },
+
+    addIcon: {
+        position: 'absolute',
+        bottom: 25,
+        right: 25
+    },
+
+    normalText: {
+        color: '#171717',
+        fontSize: 15
+    },
+
+    textLineThrough: {
+        textDecorationLine: 'line-through',
+        color: '#a9a9a9',
+        fontSize: 15
+    }
+})
