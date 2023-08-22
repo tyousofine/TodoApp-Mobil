@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Button } from 'react-native';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+
 import * as SQLite from "expo-sqlite";
 
 import DateIcon from 'react-native-vector-icons/Fontisto';
 import BackIcon from 'react-native-vector-icons/Feather';
-
-import { Dimensions } from 'react-native';
-
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 
 const AddTaskScreen = ({ navigation }) => {
 
@@ -23,13 +19,14 @@ const AddTaskScreen = ({ navigation }) => {
 
     const db = SQLite.openDatabase('taskDB');
 
+    // add task to db function
     saveToDatabase = () => {
-
+        // check for empty task name field
         if (taskName === '') {
             alert('Please enter a task')
             return
         }
-
+        // db query
         db.transaction(
             tx => {
                 tx.executeSql("INSERT INTO taskDB (taskName, taskDetail, taskDueDate, taskDone) values (?, ?, ?, false)",
@@ -40,18 +37,14 @@ const AddTaskScreen = ({ navigation }) => {
                             setTaskName('');
                             setTaskDetail('');
                             clearDate()
-
                         }
-                        else { console.log('INSERT FAILED!') }
+                        // change button for succcess transaction
+                        setTimeout(() => setSuccess(false), 2000)
                     },
                     (_, result) => console.log('INSERT failed:' + result)
                 );
             }
         );
-
-        setTimeout(() => setSuccess(false), 2000)
-        // retrieveFromDatabase()
-
     }
 
     // Date picker functions
@@ -68,7 +61,6 @@ const AddTaskScreen = ({ navigation }) => {
             mode: currentMode,
             is24Hour: true,
             display: 'calendar',
-
         });
     };
 
@@ -84,6 +76,8 @@ const AddTaskScreen = ({ navigation }) => {
         setShow(false);
         setForNoDatePicked(true);
     }
+
+
     return (
         < View style={styles.addTaskContainer} >
             <TextInput
@@ -93,10 +87,10 @@ const AddTaskScreen = ({ navigation }) => {
                 placeholder='Task'
                 maxLength={100}
                 textAlignVertical='top'
+                cursorColor={'#7E38B7'}
             />
 
             <View style={styles.dateContainer}>
-
                 <View style={styles.dateOutputFrame}>
                     <Text style={{ color: 'grey' }}>Due Date:
                     </Text>
@@ -111,9 +105,8 @@ const AddTaskScreen = ({ navigation }) => {
                     }
 
                 </View>
-                <TouchableOpacity onPress={(event) => showDatepicker()} title="Due Date" style={{}} >
+                <TouchableOpacity onPress={(event) => showDatepicker()} title="Due Date" >
                     <DateIcon name='date' size={40} style={styles.dateBtn} />
-
                 </TouchableOpacity>
             </View>
 
@@ -125,7 +118,7 @@ const AddTaskScreen = ({ navigation }) => {
                 editable
                 multiline={true}
                 numberOfLines={8}
-                cursorColor={'grey'}
+                cursorColor={'#7E38B7'}
                 textAlignVertical='top'
             />
             <View style={styles.btnsContainer}>
@@ -135,7 +128,7 @@ const AddTaskScreen = ({ navigation }) => {
                     style={styles.backIcon}
                     onPress={() => navigation.navigate('Tasks')} />
 
-
+                {/* Button change conditional for success */}
                 {!success ? (
                     <TouchableOpacity
                         TouchableOpacity={0.5}
@@ -146,10 +139,9 @@ const AddTaskScreen = ({ navigation }) => {
                 ) : (
                     <TouchableOpacity
                         TouchableOpacity={0.5}
-                        style={[styles.saveBtn, { backgroundColor: 'navy' }]}>
+                        style={[styles.saveBtn, { backgroundColor: '#A679CA' }]}>
                         <Text style={styles.saveBtnTxt}>Success</Text>
                     </TouchableOpacity>
-
                 )}
             </View>
         </View >
@@ -171,11 +163,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginBottom: 10,
         marginHorizontal: 20,
-
     },
 
     dateBtn: {
-        color: '#318CE7',
+        color: '#7E38B7',
     },
 
     dateOutputFrame: {
@@ -200,8 +191,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 0,
         top: 5,
-
-
     },
 
     titleInput: {
@@ -229,9 +218,9 @@ const styles = StyleSheet.create({
 
     btnsContainer: {
 
+        display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        display: 'flex',
         flexDirection: 'row'
 
     },
@@ -243,7 +232,7 @@ const styles = StyleSheet.create({
         marginLeft: 'auto',
         marginRight: 20,
         padding: 6,
-        backgroundColor: '#318CE7',
+        backgroundColor: '#7E38B7',
         marginTop: 5
     },
 
@@ -255,7 +244,7 @@ const styles = StyleSheet.create({
     },
 
     backIcon: {
-        color: "#318CE7",
+        color: "#7E38B7",
         marginLeft: 20,
     }
 

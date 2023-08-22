@@ -27,13 +27,8 @@ const HomeScreen = ({ navigation, props }) => {
 
     const db = SQLite.openDatabase('taskDB');
 
-
-    // const extractDone = () => {
-    //     setDone(dataFromDatabase.map((check) => check.taskDone))
-    // }
-    // Data and DB functions:
+    // upon app opening, create db if not exists and load db if exists
     useEffect(() => {
-
         db.transaction(tx => {
             tx.executeSql('CREATE TABLE IF NOT EXISTS taskDB (id INTEGER PRIMARY KEY NOT NULL, taskName TEXT, taskDetail TEXT, taskDone BOOLEAN, taskDueDate TEXT);',
                 [],
@@ -42,30 +37,25 @@ const HomeScreen = ({ navigation, props }) => {
             );
         });
         retrieveFromDatabase();
-        // extractDone();
-
     }, []);
 
+    // reload DB again when focus back to main page. 
     useEffect(() => {
         if (isFocused) {
             retrieveFromDatabase()
         }
-
     }, [isFocused])
 
+    // load DB Function
     retrieveFromDatabase = () => {
         let entries = []
-
         db.transaction(
             tx => {
                 tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDueDate)",
                     [],
                     (_, { rows }) => {
                         (rows._array).map((row) => entries.push(row)),
-
                             setDataFromDatabase(entries);
-
-
                     },
                     (_, result) => {
                         console.log('SELECT failed!');
@@ -74,19 +64,16 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
-
     }
-    onTaskDone = (index) => {
 
+    // Add tasks function
+    onTaskDone = (index) => {
         db.transaction(
             tx => {
                 tx.executeSql(`UPDATE taskDB SET taskDone = ((taskDone | 1) - (taskDone & 1)) WHERE id = ${index}`,
-
                     [],
                     (_, result) => {
-
                         console.log('success')
-
                     },
                     (_, error) => {
                         console.log('Error executing SQL query:', error);
@@ -97,6 +84,7 @@ const HomeScreen = ({ navigation, props }) => {
         retrieveFromDatabase()
     }
 
+    // Search for tasks based on user search input
     const searchTasks = (searchValue) => {
         let searchResults = []
         dataFromDatabase.map((item) => {
@@ -104,7 +92,6 @@ const HomeScreen = ({ navigation, props }) => {
                 const duplicate = searchResults.find((e) =>
                     e.id === item.id)
                 if (duplicate) return;
-
                 searchResults.push(item);
             }
 
@@ -122,41 +109,36 @@ const HomeScreen = ({ navigation, props }) => {
                 searchResults.push(item);
             }
         })
-
         setSearchArray(searchResults);
         setDataFromDatabase(searchResults);
-
     }
-
-
 
     return (
         <View style={styles.container}>
 
-
             <ScrollView
+                // search bar
                 keyboardDismissMode='true'>
                 <View style={styles.searchContainer}>
-
                     <TextInput
                         style={styles.sesarchBox}
                         value={searchValue}
                         onChangeText={setSearchValue}
                         maxLength={100}
-
+                        cursorColor={'#7E38B7'}
                     >
                     </TextInput>
                     <TouchableOpacity
                         onPress={() => searchTasks(searchValue)}
-                        onSubmitEditing={Keyboard.dismiss}
-                    >
-                        <SearchIcon name='search1' size={30} style={{ color: '#171717' }}></SearchIcon>
+                        onSubmitEditing={Keyboard.dismiss}>
+                        <SearchIcon name='search1' size={30} style={{ color: '#7E38B7' }}></SearchIcon>
                     </TouchableOpacity>
                 </View>
+
+                {/* tasks display */}
                 <View style={styles.tasksContainer}>
                     {dataFromDatabase.length > 0 ? (
                         <TaskList
-
                             data={dataFromDatabase}
                             onTaskDone={onTaskDone} />
                     ) : (
@@ -164,13 +146,13 @@ const HomeScreen = ({ navigation, props }) => {
                     )}
                 </View >
             </ScrollView>
+
+            {/* add icon with link to add task page */}
             <TouchableOpacity
                 onPress={() => navigation.navigate('Add Task')}
-                style={styles.addIcon}
-            >
-                <AddIcon name="add-circle-sharp" size={60} color="#318CE7" />
+                style={styles.addIcon}>
+                <AddIcon name="add-circle-sharp" size={60} color="#7E38B7" />
             </TouchableOpacity>
-
         </View >
     )
 }
@@ -179,7 +161,6 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
     tasksContainer: {
-
         paddingTop: 20,
         paddingHorizontal: 12,
         backgroundColor: '#fafafa',
@@ -191,7 +172,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         gap: 10,
         alignItems: 'center',
-        backgroundColor: 'lightblue',
+        backgroundColor: '#E0CDEE',
         paddingVertical: 10,
         paddingHorizontal: 20
     },
@@ -216,8 +197,5 @@ const styles = StyleSheet.create({
         bottom: 25,
         right: 25
     },
-
-
-
 })
 

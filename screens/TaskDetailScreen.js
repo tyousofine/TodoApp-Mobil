@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 
-
 import * as SQLite from "expo-sqlite";
 
 import DeleteIcon from 'react-native-vector-icons/AntDesign';
@@ -14,13 +13,11 @@ const TaskDetailScreen = ({ route, navigation }) => {
     const [editedTask, setEditedTask] = useState('');
     const [editedDate, setEditedDate] = useState('');
     const [editedDetail, setEditedDetail] = useState('');
-
     const [success, setSuccess] = useState(false)
-
 
     const db = SQLite.openDatabase('taskDB');
 
-
+    // function to perform db query for id passed from homeScreen to display task details
     useEffect(() => {
         db.transaction((tx) => {
             tx.executeSql(
@@ -38,38 +35,33 @@ const TaskDetailScreen = ({ route, navigation }) => {
                     } else {
                         console.log('No task found');
                     }
-
                 },
                 (_, error) => {
                     console.log('Error executing SQL query:', error);
                 }
             );
         });
-
     }, []);
 
 
-
+    // function to save task changes to db
     const editTask = () => {
-
-
         db.transaction((tx) => {
             tx.executeSql("REPLACE INTO taskDB (id, taskName, taskDetail, taskDone, taskDueDate) VALUES (?, ?, ?, 0, ?)",
                 [row.id, editedTask, editedDetail, editedDate],
                 (_, result) => {
                     setSuccess(true)
-
                     if (result.rowsAffected > 0) {
                         console.log('updated task')
-
                     }
-
                 },
                 (_, error) => console.log('UPDATE failed:' + error));
         })
         setTimeout(() => setSuccess(false), 2000)
     }
 
+
+    // delete from db/tasks function with user confirmation prompts
     const deleteFromDB = () => {
         Alert.alert(
             'DELETE TASK', 'Are you sure?',
@@ -85,7 +77,6 @@ const TaskDetailScreen = ({ route, navigation }) => {
                             `DELETE FROM taskDB WHERE id = ${row.id}`,
                             [],
                             (tx, results) => {
-
                                 if (results.rowsAffected > 0) {
                                     Alert.alert(
                                         'SUCCESS',
@@ -103,8 +94,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
                             }
                         )
                     })
-                }
-            ])
+                }])
     }
 
 
@@ -112,22 +102,23 @@ const TaskDetailScreen = ({ route, navigation }) => {
         <View>
             <View style={styles.deleteContainer}>
                 <TouchableOpacity
-                    onPress={deleteFromDB}
-                >
+                    onPress={deleteFromDB}>
                     <DeleteIcon
-                        name='delete' size={30} style={{ color: 'red' }} />
+                        name='delete' size={30} style={{ color: '#CF6DDE', }} />
                 </TouchableOpacity>
             </View>
+
             <View style={styles.taskDetailContainer}>
-                <View style={{}}>
-                    <Text style={styles.fieldTitles}>TASK:</Text>
+                <View style={styles.inputContainer}>
+                    <Text style={styles.fieldTitles}>TASK</Text>
                     <TextInput
                         style={styles.titleInput}
                         defaultValue={row.taskName}
-
+                        cursorColor={'#7E38B7'}
                         onChangeText={setEditedTask}
                     />
                 </View>
+
                 <View style={styles.dateSection}>
                     <Text style={styles.fieldTitles}>Due Date: </Text>
                     <TextInput
@@ -135,26 +126,30 @@ const TaskDetailScreen = ({ route, navigation }) => {
                         onChangeText={setEditedDate}
                     />
                 </View>
+
                 <View>
-                    <Text style={styles.fieldTitles}>DETAILS: </Text>
+                    <Text style={styles.fieldTitles}>DETAILS</Text>
                     <TextInput
                         style={styles.detailInput}
                         placeholder='Detail'
                         editable
                         multiline={true}
                         numberOfLines={8}
-                        cursorColor={'grey'}
+                        cursorColor={'#7E38B7'}
                         textAlignVertical='top'
                         defaultValue={!!row.taskDetail ? row.taskDetail : 'No detail was set'}
                         onChangeText={setEditedDetail}
                     />
                 </View>
+
                 <View style={styles.btnsContainer}>
                     <BackIcon
                         name="arrow-left-circle"
                         size={40}
                         style={styles.backIcon}
                         onPress={() => navigation.navigate('Tasks')} />
+
+                    {/* conditional for button change upon update success */}
                     {!success ? (
                         <TouchableOpacity
                             style={styles.saveBtn}
@@ -162,7 +157,7 @@ const TaskDetailScreen = ({ route, navigation }) => {
                             <Text style={styles.saveBtnTxt}>Edit</Text>
                         </TouchableOpacity>
                     ) : (<TouchableOpacity
-                        style={[styles.saveBtn, { backgroundColor: 'navy' }]}
+                        style={[styles.saveBtn, { backgroundColor: '#A679CA' }]}
                         onPress={editTask}>
                         <Text style={styles.saveBtnTxt}>Success</Text>
                     </TouchableOpacity>)}
@@ -177,7 +172,7 @@ export default TaskDetailScreen;
 const styles = StyleSheet.create({
     taskDetailContainer: {
         display: 'flex',
-        paddingHorizontal: 15,
+        paddingHorizontal: 18,
         gap: 20,
 
     },
@@ -185,24 +180,23 @@ const styles = StyleSheet.create({
     deleteContainer: {
         width: '100%',
         alignItems: 'flex-end',
-        backgroundColor: 'lightblue',
         paddingVertical: 10,
-        marginBottom: 10
-
+        marginBottom: 10,
+        paddingRight: 15,
     },
+
     fieldTitles: {
         fontWeight: 'bold',
-
+        color: '#7E38B7',
+        marginBottom: 5
     },
 
     titleInput: {
         borderWidth: 1,
         borderColor: 'lightgrey',
         paddingVertical: 4,
-
         borderRadius: 4,
-
-
+        paddingHorizontal: 4
     },
 
     dateSection: {
@@ -213,8 +207,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: 'lightgrey',
         borderRadius: 4
-
-
     },
 
     detailInput: {
@@ -224,6 +216,7 @@ const styles = StyleSheet.create({
         padding: 4,
         borderRadius: 4,
         fontSize: 14,
+
     },
 
     btnsContainer: {
@@ -238,9 +231,8 @@ const styles = StyleSheet.create({
         color: 'white',
         width: '25%',
         padding: 6,
-        backgroundColor: '#318CE7',
+        backgroundColor: '#7E38B7',
         marginTop: 5,
-
     },
 
     saveBtnTxt: {
@@ -251,8 +243,6 @@ const styles = StyleSheet.create({
     },
 
     backIcon: {
-        color: "#318CE7",
-
+        color: "#7E38B7",
     }
-
 })

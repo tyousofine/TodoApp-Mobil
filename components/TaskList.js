@@ -1,41 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
-import TaskDetailScreen from '../screens/TaskDetailScreen';
-
 import { useNavigation } from '@react-navigation/native';
-
 import Checked from 'react-native-vector-icons/FontAwesome';
-
-
 import { Dimensions } from 'react-native';
 
-
-
 const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
 
-
+// Props received from HomeScreen
 const TaskList = (props) => {
     const [tasks, setTasks] = useState(props.data);
     const navigation = useNavigation()
 
+    // updating props with every change incoming from parent component
     useEffect(() => {
-
         setTasks(props.data);
     }, [props.data]);
 
-
-
-
-
+    // update tasks when checked or unchecked
     const onTaskDone = (id) => {
         props.onTaskDone(id)
-
     }
 
     return (
         tasks?.map((item) => (
-
             <View style={styles.tasks}
                 key={item.id}>
                 <View>
@@ -47,6 +34,7 @@ const TaskList = (props) => {
                             style={{ color: 'grey', paddingTop: 4, width: 25 }} />
                     </TouchableOpacity>
                 </View>
+
                 <View>
                     <TouchableOpacity
                         key={item.id}
@@ -59,33 +47,25 @@ const TaskList = (props) => {
                         <Text style={{ color: 'grey', fontSize: 12 }}>{item.taskDueDate}</Text>
                     </TouchableOpacity>
                 </View>
-
             </View>
-
         ))
     )
 }
 
 export default TaskList;
 
-
 const styles = StyleSheet.create({
 
     tasks: {
-
         borderBottomWidth: 0.5,
         borderColor: 'lightgrey',
-
         flexDirection: 'row',
         alignItems: 'flex-start',
         gap: 12,
         marginBottom: 7,
-
         borderBottomColor: 'lightgrey',
         padding: 5
     },
-
-
 
     normalText: {
         color: '#171717',
