@@ -84,12 +84,10 @@ const HomeScreen = ({ navigation, props }) => {
 
                     [],
                     (_, result) => {
-                        console.log('RESULT: ', result)
+
                         console.log('success')
 
                     },
-
-
                     (_, error) => {
                         console.log('Error executing SQL query:', error);
                     }
@@ -128,7 +126,6 @@ const HomeScreen = ({ navigation, props }) => {
         setSearchArray(searchResults);
         setDataFromDatabase(searchResults);
 
-
     }
 
 
@@ -136,17 +133,13 @@ const HomeScreen = ({ navigation, props }) => {
     return (
         <View style={styles.container}>
 
-            {/* top tasks sections */}
+
             <ScrollView
                 keyboardDismissMode='true'>
-                <View style={{
-                    display: 'flex', flexDirection: 'row', gap: 10, alignItems: 'center',
-                    backgroundColor: 'lightblue',
-                    padding: 10
-                }}>
+                <View style={styles.searchContainer}>
 
                     <TextInput
-                        style={{ borderWidth: 0.25, width: '90%', borderColor: 'lightgrey', backgroundColor: 'white', height: 40 }}
+                        style={styles.sesarchBox}
                         value={searchValue}
                         onChangeText={setSearchValue}
                         maxLength={100}
@@ -157,7 +150,7 @@ const HomeScreen = ({ navigation, props }) => {
                         onPress={() => searchTasks(searchValue)}
                         onSubmitEditing={Keyboard.dismiss}
                     >
-                        <SearchIcon name='search1' size={25} style={{ color: '#171717' }}></SearchIcon>
+                        <SearchIcon name='search1' size={30} style={{ color: '#171717' }}></SearchIcon>
                     </TouchableOpacity>
                 </View>
                 <View style={styles.tasksContainer}>
@@ -191,6 +184,25 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         backgroundColor: '#fafafa',
         minHeight: windowHeight,
+    },
+
+    searchContainer: {
+        display: 'flex',
+        flexDirection: 'row',
+        gap: 10,
+        alignItems: 'center',
+        backgroundColor: 'lightblue',
+        paddingVertical: 10,
+        paddingHorizontal: 20
+    },
+
+    sesarchBox: {
+        borderWidth: 0.25,
+        width: '90%',
+        borderColor: 'lightgrey',
+        backgroundColor: 'white',
+        height: 40,
+        borderRadius: 4
     },
 
     noTasks: {
