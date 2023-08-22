@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import TaskDetailScreen from '../screens/TaskDetailScreen';
+
+import { useNavigation } from '@react-navigation/native';
 
 import Checked from 'react-native-vector-icons/FontAwesome';
+
 
 import { Dimensions } from 'react-native';
 
@@ -13,13 +17,14 @@ const windowHeight = Dimensions.get('window').height;
 
 const TaskList = (props) => {
     const [tasks, setTasks] = useState(props.data);
+    const navigation = useNavigation()
 
     useEffect(() => {
 
         setTasks(props.data);
     }, [props.data]);
 
-    console.log('TASKS IN CHILD: ', tasks)
+
 
 
 
@@ -44,7 +49,7 @@ const TaskList = (props) => {
                     <View>
                         <TouchableOpacity
                             key={item.id}
-                            onPress={() => navigation.navigate(`Edit Task`, { id: item.id })
+                            onPress={() => navigation.navigate('Edit Task', { id: item.id })
                             }
                             style={{ width: windowWidth }}
                         ><Text
@@ -79,11 +84,7 @@ const styles = StyleSheet.create({
         padding: 5
     },
 
-    addIcon: {
-        position: 'absolute',
-        bottom: 25,
-        right: 25
-    },
+
 
     normalText: {
         color: '#171717',

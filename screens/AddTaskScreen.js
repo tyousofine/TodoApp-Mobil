@@ -139,7 +139,7 @@ const AddTaskScreen = ({ navigation }) => {
                 {!success ? (
                     <TouchableOpacity
                         TouchableOpacity={0.5}
-                        style={[styles.saveBtn, { backgroundColor: '#318CE7' }]}
+                        style={styles.saveBtn}
                         onPress={() => saveToDatabase()}>
                         <Text style={styles.saveBtnTxt}>ADD</Text>
                     </TouchableOpacity>
@@ -166,8 +166,6 @@ const styles = StyleSheet.create({
     },
 
     dateContainer: {
-
-
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
@@ -190,7 +188,6 @@ const styles = StyleSheet.create({
         borderColor: "lightgrey",
         width: '70%',
         height: 40,
-
     },
 
     btnText: {
@@ -214,7 +211,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         marginVertical: 10,
         borderRadius: 4,
-        paddingVertical: 6
+        paddingVertical: 6,
+        paddingHorizontal: 4,
+        fontSize: 14
+
     },
 
     detailInput: {
@@ -222,8 +222,9 @@ const styles = StyleSheet.create({
         borderColor: 'lightgrey',
         width: '90%',
         marginHorizontal: 20,
-        borderRadius: 4
-
+        borderRadius: 4,
+        fontSize: 14,
+        paddingHorizontal: 4
     },
 
     btnsContainer: {
@@ -236,13 +237,13 @@ const styles = StyleSheet.create({
     },
 
     saveBtn: {
-        // backgroundColor: "#318CE7",
+        borderRadius: 20,
         color: 'white',
         width: '25%',
         marginLeft: 'auto',
         marginRight: 20,
         padding: 6,
-        borderRadius: 4,
+        backgroundColor: '#318CE7',
         marginTop: 5
     },
 

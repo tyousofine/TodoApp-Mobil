@@ -76,9 +76,8 @@ const HomeScreen = ({ navigation, props }) => {
         );
 
     }
-
     onTaskDone = (index) => {
-        console.log('DATA in HOME SCREEN: ', dataFromDatabase)
+
         db.transaction(
             tx => {
                 tx.executeSql(`UPDATE taskDB SET taskDone = ((taskDone | 1) - (taskDone & 1)) WHERE id = ${index}`,
@@ -125,11 +124,10 @@ const HomeScreen = ({ navigation, props }) => {
                 searchResults.push(item);
             }
         })
-        console.log('SEARCH RESULTES: ', searchResults)
+
         setSearchArray(searchResults);
         setDataFromDatabase(searchResults);
 
-        console.log('DATA FROM DATABASE: ', dataFromDatabase)
 
     }
 
@@ -152,7 +150,7 @@ const HomeScreen = ({ navigation, props }) => {
                         value={searchValue}
                         onChangeText={setSearchValue}
                         maxLength={100}
-                    // onChange={() => { if (searchValue === '') { retrieveFromDatabase() } }}
+
                     >
                     </TextInput>
                     <TouchableOpacity
@@ -188,6 +186,7 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
     tasksContainer: {
+
         paddingTop: 20,
         paddingHorizontal: 12,
         backgroundColor: '#fafafa',
@@ -198,6 +197,12 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginLeft: windowWidth / 5,
         marginTop: 30
+    },
+
+    addIcon: {
+        position: 'absolute',
+        bottom: 25,
+        right: 25
     },
 
 
