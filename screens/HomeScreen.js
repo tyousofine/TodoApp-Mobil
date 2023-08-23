@@ -6,7 +6,6 @@ import * as SQLite from "expo-sqlite";
 
 import AddIcon from 'react-native-vector-icons/Ionicons';
 import SearchIcon from 'react-native-vector-icons/AntDesign'
-import Checked from 'react-native-vector-icons/FontAwesome';
 
 import TaskList from '../components/TaskList';
 
@@ -17,11 +16,9 @@ import { Dimensions } from 'react-native';
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
 
-const HomeScreen = ({ navigation, props }) => {
+const HomeScreen = ({ navigation }) => {
     const isFocused = useIsFocused();
-    let newDone = []
     const [dataFromDatabase, setDataFromDatabase] = useState([]);
-    const [done, setDone] = useState([])
     const [searchValue, setSearchValue] = useState('')
     const [searchArray, setSearchArray] = useState([])
 
@@ -51,11 +48,12 @@ const HomeScreen = ({ navigation, props }) => {
         let entries = []
         db.transaction(
             tx => {
-                tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDueDate)",
+                tx.executeSql("SELECT * FROM taskDB ORDER BY (taskDone) ASC, (taskDueDate) ASC",
                     [],
                     (_, { rows }) => {
                         (rows._array).map((row) => entries.push(row)),
-                            setDataFromDatabase(entries);
+                            setDataFromDatabase(entries)
+
                     },
                     (_, result) => {
                         console.log('SELECT failed!');
@@ -81,28 +79,42 @@ const HomeScreen = ({ navigation, props }) => {
                 )
             }
         );
+
+        // logic update state to update props in taskList for search resutls task done toggle
+        searchArray.map((item) => {
+            let newArray = []
+            if (item.id === index) {
+                item.taskDone = !item.taskDone
+                newArray.push(item)
+                setSearchArray(newArray)
+
+            }
+        })
         retrieveFromDatabase()
     }
+
+
 
     // Search for tasks based on user search input
     const searchTasks = (searchValue) => {
         let searchResults = []
         dataFromDatabase.map((item) => {
-            if (item.taskName.includes(searchValue)) {
+
+            if (item.taskName.toLowerCase().includes(searchValue)) {
                 const duplicate = searchResults.find((e) =>
                     e.id === item.id)
                 if (duplicate) return;
                 searchResults.push(item);
             }
 
-            if (item.taskDetail.includes(searchValue)) {
+            if (item.taskDetail.toLowerCase().includes(searchValue)) {
                 const duplicate = searchResults.find((e) =>
                     e.id === item.id)
                 if (duplicate) return;
                 searchResults.push(item);
             }
 
-            if (item.taskDueDate.includes(searchValue)) {
+            if (item.taskDueDate.toLowerCase().includes(searchValue)) {
                 const duplicate = searchResults.find((e) =>
                     e.id === item.id)
                 if (duplicate) return;
@@ -110,27 +122,31 @@ const HomeScreen = ({ navigation, props }) => {
             }
         })
         setSearchArray(searchResults);
-        setDataFromDatabase(searchResults);
-    }
 
+    }
     return (
         <View style={styles.container}>
 
             <ScrollView
                 // search bar
-                keyboardDismissMode='true'>
+                keyboardShouldPersistTaps='handled'>
                 <View style={styles.searchContainer}>
                     <TextInput
                         style={styles.sesarchBox}
                         value={searchValue}
                         onChangeText={setSearchValue}
+                        onKeyPress={({ nativeEvent }) => {
+                            if (nativeEvent.key === 'Backspace' && searchValue === '') {
+                                searchTasks()
+                            }
+                        }}
                         maxLength={100}
                         cursorColor={'#7E38B7'}
                     >
                     </TextInput>
                     <TouchableOpacity
-                        onPress={() => searchTasks(searchValue)}
-                        onSubmitEditing={Keyboard.dismiss}>
+                        onPress={() => searchTasks(searchValue.toLowerCase())}
+                    >
                         <SearchIcon name='search1' size={30} style={{ color: '#7E38B7' }}></SearchIcon>
                     </TouchableOpacity>
                 </View>
@@ -138,8 +154,9 @@ const HomeScreen = ({ navigation, props }) => {
                 {/* tasks display */}
                 <View style={styles.tasksContainer}>
                     {dataFromDatabase.length > 0 ? (
+
                         <TaskList
-                            data={dataFromDatabase}
+                            data={searchArray.length === 0 ? dataFromDatabase : searchArray}
                             onTaskDone={onTaskDone} />
                     ) : (
                         <Text style={styles.noTasks}>No Tasks to Display</Text>

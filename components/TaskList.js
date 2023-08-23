@@ -11,6 +11,7 @@ const TaskList = (props) => {
     const [tasks, setTasks] = useState(props.data);
     const navigation = useNavigation()
 
+
     // updating props with every change incoming from parent component
     useEffect(() => {
         setTasks(props.data);
@@ -61,8 +62,7 @@ const styles = StyleSheet.create({
         borderColor: 'lightgrey',
         flexDirection: 'row',
         alignItems: 'flex-start',
-        gap: 12,
-        marginBottom: 7,
+        gap: 8,
         borderBottomColor: 'lightgrey',
         padding: 5
     },

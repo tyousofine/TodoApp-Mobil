@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "TodoAppMobile",
-    "slug": "TodoAppMobile",
+    "name": "TodoApp",
+    "slug": "todoApp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,6 +18,8 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.ty.creations.todo.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -25,6 +27,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ada76934-9437-49dd-8efc-048cd94d7b36"
+      }
     }
   }
 }
